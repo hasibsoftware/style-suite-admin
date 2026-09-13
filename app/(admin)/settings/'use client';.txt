@@ -1,0 +1,289 @@
+'use client';
+
+import { useState } from 'react';
+import toast from 'react-hot-toast'; // টোস্ট নোটিফিকেশন
+import styles from '../dashboard.module.css';
+import { 
+    FiSettings, 
+    FiBriefcase, 
+    FiTruck, 
+    FiBell, 
+    FiBox, 
+    FiDollarSign, 
+    FiDatabase, 
+    FiShield,
+    FiCreditCard,
+    FiLayout,
+    FiFileText
+} from 'react-icons/fi';
+
+export default function SettingsPage() {
+    // ডিফল্টভাবে 'business' ট্যাব ওপেন থাকবে
+    const [activeTab, setActiveTab] = useState('business');
+
+    // ================= Business Profile States =================
+    const [companyName, setCompanyName] = useState('Smart Mess');
+    const [supportEmail, setSupportEmail] = useState('support@smartmess.com');
+    const [phone, setPhone] = useState('+880 1700 000000');
+    const [currency, setCurrency] = useState('BDT');
+    const [address, setAddress] = useState('Dhaka, Bangladesh');
+    const [businessErrors, setBusinessErrors] = useState({});
+
+    // ================= Delivery & Courier States =================
+    const [insideDhaka, setInsideDhaka] = useState('60');
+    const [outsideDhaka, setOutsideDhaka] = useState('120');
+    const [courierPartner, setCourierPartner] = useState('Pathao Courier');
+    const [deliveryErrors, setDeliveryErrors] = useState({});
+
+    // --- Business Profile Save Handler ---
+    const handleSaveBusiness = (e) => {
+        e.preventDefault();
+        let newErrors = {};
+
+        if (!companyName.trim()) {
+            newErrors.companyName = 'Company name is required!';
+        }
+        if (!supportEmail.trim()) {
+            newErrors.supportEmail = 'Support email is required!';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setBusinessErrors(newErrors);
+            toast.error('Please fill up all required business profile fields!');
+            return; 
+        }
+
+        setBusinessErrors({});
+        toast.success(`${companyName} profile updated successfully!`);
+    };
+
+    // --- Delivery & Courier Save Handler ---
+    const handleSaveDelivery = (e) => {
+        e.preventDefault();
+        let newErrors = {};
+
+        if (insideDhaka === '' || Number(insideDhaka) < 0) {
+            newErrors.insideDhaka = 'Valid delivery charge required!';
+        }
+        if (outsideDhaka === '' || Number(outsideDhaka) < 0) {
+            newErrors.outsideDhaka = 'Valid delivery charge required!';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setDeliveryErrors(newErrors);
+            toast.error('Please enter valid delivery charges!');
+            return;
+        }
+
+        setDeliveryErrors({});
+        toast.success('Delivery & Courier settings saved successfully!');
+    };
+
+    // সাইডবার মেনু লিস্ট
+    const menuGroups = [
+        {
+            title: 'General',
+            items: [
+                { id: 'business', label: 'Business Profile', icon: FiBriefcase },
+                { id: 'appearance', label: 'Appearance & Theme', icon: FiLayout },
+            ]
+        },
+        {
+            title: 'Operations',
+            items: [
+                { id: 'delivery', label: 'Delivery & Courier', icon: FiTruck },
+                { id: 'products', label: 'Product Settings', icon: FiBox },
+                { id: 'salary', label: 'Salary & Payroll', icon: FiDollarSign },
+            ]
+        },
+        {
+            title: 'Finance & Comms',
+            items: [
+                { id: 'payment', label: 'Payment Gateways', icon: FiCreditCard },
+                { id: 'invoice', label: 'Taxes & Invoicing', icon: FiFileText },
+                { id: 'notifications', label: 'Notifications', icon: FiBell },
+            ]
+        },
+        {
+            title: 'System & Security',
+            items: [
+                { id: 'security', label: 'Security & Roles', icon: FiShield },
+                { id: 'system', label: 'System, Backup & Maint.', icon: FiDatabase },
+            ]
+        }
+    ];
+
+    return (
+        <div style={{ padding: '0 4px' }}>
+            <div className={styles.settingsHeader}>
+                <h2><FiSettings style={{ color: '#90273c' }} /> Settings & Configuration</h2>
+                <p>Manage your store preferences, system operations, and administrative tools.</p>
+            </div>
+
+            <div className={styles.settingsContainer}>
+                
+                {/* ১. বামপাশের সাইডবার মেনু */}
+                <div className={styles.settingsSidebar}>
+                    {menuGroups.map((group, idx) => (
+                        <div key={idx}>
+                            <div className={styles.settingsMenuTitle}>{group.title}</div>
+                            {group.items.map(item => {
+                                const IconComponent = item.icon;
+                                return (
+                                    <div 
+                                        key={item.id}
+                                        className={`${styles.settingsMenuItem} ${activeTab === item.id ? styles.active : ''}`}
+                                        onClick={() => setActiveTab(item.id)}
+                                    >
+                                        <IconComponent size={16} />
+                                        {item.label}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+
+                {/* ২. ডানপাশের কন্টেন্ট এরিয়া */}
+                <div className={styles.settingsContentArea}>
+                    
+                    {/* Business Profile Tab */}
+                    {activeTab === 'business' && (
+                        <div>
+                            <h3 className={styles.settingsCardTitle}>Business Profile</h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                
+                                <div className={styles.settingsFormGroup}>
+                                    <label>Company Name <span style={{color: 'red'}}>*</span></label>
+                                    <input 
+                                        type="text" 
+                                        value={companyName}
+                                        onChange={(e) => setCompanyName(e.target.value)}
+                                        style={{ borderColor: businessErrors.companyName ? 'red' : '' }}
+                                    />
+                                    {businessErrors.companyName && (
+                                        <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+                                            {businessErrors.companyName}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className={styles.settingsFormGroup}>
+                                    <label>Support Email <span style={{color: 'red'}}>*</span></label>
+                                    <input 
+                                        type="email" 
+                                        value={supportEmail}
+                                        onChange={(e) => setSupportEmail(e.target.value)}
+                                        style={{ borderColor: businessErrors.supportEmail ? 'red' : '' }}
+                                    />
+                                    {businessErrors.supportEmail && (
+                                        <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+                                            {businessErrors.supportEmail}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className={styles.settingsFormGroup}>
+                                    <label>Phone Number</label>
+                                    <input 
+                                        type="text" 
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)} 
+                                    />
+                                </div>
+
+                                <div className={styles.settingsFormGroup}>
+                                    <label>Currency</label>
+                                    <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                                        <option value="BDT">BDT (৳)</option>
+                                        <option value="USD">USD ($)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className={styles.settingsFormGroup}>
+                                <label>Business Address</label>
+                                <input 
+                                    type="text" 
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)} 
+                                />
+                            </div>
+
+                            <button onClick={handleSaveBusiness} className={styles.settingsSaveBtn}>
+                                Save Changes
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Delivery & Courier Tab */}
+                    {activeTab === 'delivery' && (
+                        <div>
+                            <h3 className={styles.settingsCardTitle}>Delivery & Courier Settings</h3>
+                            
+                            <div className={styles.settingsFormGroup}>
+                                <label>Inside Dhaka Delivery Charge (৳) <span style={{color: 'red'}}>*</span></label>
+                                <input 
+                                    type="number" 
+                                    value={insideDhaka}
+                                    onChange={(e) => setInsideDhaka(e.target.value)}
+                                    style={{ borderColor: deliveryErrors.insideDhaka ? 'red' : '' }}
+                                />
+                                {deliveryErrors.insideDhaka && (
+                                    <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+                                        {deliveryErrors.insideDhaka}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className={styles.settingsFormGroup}>
+                                <label>Outside Dhaka Delivery Charge (৳) <span style={{color: 'red'}}>*</span></label>
+                                <input 
+                                    type="number" 
+                                    value={outsideDhaka}
+                                    onChange={(e) => setOutsideDhaka(e.target.value)}
+                                    style={{ borderColor: deliveryErrors.outsideDhaka ? 'red' : '' }}
+                                />
+                                {deliveryErrors.outsideDhaka && (
+                                    <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+                                        {deliveryErrors.outsideDhaka}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className={styles.settingsFormGroup}>
+                                <label>Default Courier Partner</label>
+                                <select 
+                                    value={courierPartner} 
+                                    onChange={(e) => setCourierPartner(e.target.value)}
+                                >
+                                    <option value="Pathao Courier">Pathao Courier</option>
+                                    <option value="Steadfast">Steadfast</option>
+                                    <option value="RedX">RedX</option>
+                                    <option value="Sundarban">Sundarban</option>
+                                </select>
+                            </div>
+
+                            <button onClick={handleSaveDelivery} className={styles.settingsSaveBtn}>
+                                Save Changes
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Placeholder for other tabs */}
+                    {['appearance', 'products', 'salary', 'payment', 'invoice', 'notifications', 'security', 'system'].includes(activeTab) && (
+                        <div style={{ textAlign: 'center', padding: '60px 0', color: '#a0aec0' }}>
+                            <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.2 }}>
+                                <FiSettings style={{ display: 'inline' }} />
+                            </div>
+                            <h3 style={{ color: '#4a5568', marginBottom: '8px' }}>
+                                {menuGroups.flatMap(g => g.items).find(i => i.id === activeTab)?.label}
+                            </h3>
+                            <p style={{ fontSize: '14px' }}>This settings panel is under construction.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

@@ -1,0 +1,169 @@
+.container {
+    background-color: #1e1e24;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.loginCard {
+    width: 100%;
+    max-width: 400px;
+    background-color: #5b1325;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.headerSection {
+    padding: 35px 20px 25px;
+    text-align: center;
+    color: #ffffff;
+    background: linear-gradient(180deg, #6b182d 0%, #4a0f1d 100%);
+}
+
+.logoCircle {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.brandTitle {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.brandSubtitle {
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    opacity: 0.8;
+    margin-top: 3px;
+}
+
+.formSection {
+    background-color: #f2f4f7;
+    border-top-left-radius: 26px;
+    border-top-right-radius: 26px;
+    padding: 30px 25px 25px;
+    margin-top: -10px;
+}
+
+.welcomeTitle {
+    text-align: center;
+    color: #1a202c;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+.inputGroup {
+    margin-bottom: 20px;
+}
+
+.inputGroup label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 6px;
+}
+
+.labelRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.forgotPass {
+    font-size: 12px;
+    color: #4a5568;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.forgotPass:hover {
+    text-decoration: underline;
+}
+
+.inputField {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.fieldIcon {
+    position: absolute;
+    left: 14px;
+    color: #718096;
+    font-size: 16px;
+}
+
+.inputField input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid #cbd5e0;
+    border-radius: 12px;
+    background-color: #e8f0fe;
+    outline: none;
+    font-size: 14px;
+    color: #2d3748;
+    transition: all 0.3s ease;
+}
+
+.inputField input:focus {
+    border-color: #5b1325;
+    background-color: #ffffff;
+}
+
+.toggleEye {
+    position: absolute;
+    right: 14px;
+    color: #718096;
+    cursor: pointer;
+}
+
+.submitBtn {
+    width: 100%;
+    padding: 13px;
+    background-color: #5b1325;
+    color: #ffffff;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.submitBtn:hover {
+    background-color: #420b1a;
+}
+
+.footerText {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+    color: #718096;
+}
+
+.footerText a {
+    color: #5b1325;
+    font-weight: 600;
+    text-decoration: none;
+}
