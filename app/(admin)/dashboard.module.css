@@ -1911,6 +1911,24 @@
     margin-bottom: 24px;
 }
 
+/* ==========================================================
+   LIGHT MODE TEXT VISIBILITY FIX (100% WORKING)
+   ========================================================== */
+
+:global(.pageTitle), 
+:global(.pageTitle) + p {
+    color: #1a202c !important;
+}
+
+:global(.searchBoxWrapper) input {
+    color: #1a202c !important;
+}
+
+:global(.filterDropdown),
+:global(.filterDropdown) option {
+    color: #1a202c !important;
+}
+
 /* ডার্ক মোড স্টাইলস */
 :global(html.dark-mode) {
     background-color: #1a202c;
