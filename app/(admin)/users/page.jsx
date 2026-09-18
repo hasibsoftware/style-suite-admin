@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../dashboard.module.css';
 import { FiUsers, FiUserPlus, FiUserCheck, FiUserX, FiSearch } from 'react-icons/fi';
 
@@ -8,37 +8,87 @@ import StatCard from '@/components/StatCard';
 import UserTable from '@/components/UserTable';
 import AddUserModal from '@/components/AddUserModal';
 
+import { db } from '@/lib/firebase';
+// এখানে deleteDoc ইম্পোর্ট করা হয়েছে
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+
 export default function UsersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('All');
     const [statusFilter, setStatusFilter] = useState('All');
     const [showAddModal, setShowAddModal] = useState(false);
 
-    const [users, setUsers] = useState([
-        { id: 1, name: 'Tanvir Hasan', email: 'tanvir@example.com', role: 'Super Admin', joinDate: '12 Jan 2024', status: 'Active' },
-        { id: 2, name: 'Rahim Uddin', email: 'rahim@delivery.com', role: 'Delivery Executive', joinDate: '01 Feb 2024', status: 'Active' },
-        { id: 3, name: 'Sultana Razia', email: 'sultana@example.com', role: 'Manager', joinDate: '15 Mar 2024', status: 'Active' },
-        { id: 4, name: 'Karim Mia', email: 'karim@delivery.com', role: 'Delivery Executive', joinDate: '10 Apr 2024', status: 'Suspended' },
-        { id: 5, name: 'Nusrat Jahan', email: 'nusrat@store.com', role: 'Customer Support', joinDate: '20 May 2024', status: 'Active' },
-    ]);
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const toggleUserStatus = (id) => {
-        setUsers(prev => prev.map(user => {
-            if (user.id === id) {
-                return { ...user, status: user.status === 'Active' ? 'Suspended' : 'Active' };
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                const usersList = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setUsers(usersList);
+            } catch (error) {
+                console.error("Error fetching users: ", error);
+            } finally {
+                setLoading(false);
             }
-            return user;
-        }));
+        };
+
+        fetchUsers();
+    }, []);
+
+    const toggleUserStatus = async (id) => {
+        const userToUpdate = users.find(u => u.id === id);
+        if (!userToUpdate) return;
+        
+        const newStatus = userToUpdate.status === 'Active' ? 'Suspended' : 'Active';
+
+        try {
+            const userRef = doc(db, "users", id);
+            await updateDoc(userRef, { status: newStatus });
+
+            setUsers(prev => prev.map(user => {
+                if (user.id === id) {
+                    return { ...user, status: newStatus };
+                }
+                return user;
+            }));
+        } catch (error) {
+            console.error("Error updating status: ", error);
+        }
     };
 
-    // ফাংশনটি এখন সরাসরি মডাল থেকে ডেটা রিসিভ করবে
-    const handleAddUser = (userData) => {
-        const userToAdd = {
-            id: users.length + 1,
-            ...userData
-        };
-        setUsers([userToAdd, ...users]);
-        setShowAddModal(false);
+    // ফায়ারবেস থেকে ইউজার ডিলিট করার নতুন ফাংশন
+    const handleDeleteUser = async (id) => {
+        // ডিলিট করার আগে একবার ওয়ার্নিং দেখাবে
+        const confirmDelete = window.confirm("Are you sure you want to delete this user permanently?");
+        if (!confirmDelete) return;
+
+        try {
+            // ফায়ারবেস থেকে ডিলিট
+            await deleteDoc(doc(db, "users", id));
+            // স্ক্রিন থেকে সাথে সাথে সরিয়ে ফেলা
+            setUsers(users.filter(user => user.id !== id));
+        } catch (error) {
+            console.error("Error deleting user: ", error);
+        }
+    };
+
+    const handleAddUser = async (userData) => {
+        try {
+            const docRef = await addDoc(collection(db, "users"), userData);
+            const userToAdd = {
+                id: docRef.id,
+                ...userData
+            };
+            setUsers([userToAdd, ...users]);
+            setShowAddModal(false);
+        } catch (error) {
+            console.error("Error adding user: ", error);
+        }
     };
 
     const filteredUsers = users.filter(user => {
@@ -54,7 +104,6 @@ export default function UsersPage() {
 
     return (
         <div style={{ padding: '0 4px' }}>
-            {/* ১. হেডার ও Add বাটন */}
             <div className={styles.usersHeader}>
                 <div>
                     <h2 className="pageTitle" style={{ fontSize: '20px', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -70,14 +119,12 @@ export default function UsersPage() {
                 </button>
             </div>
 
-            {/* ২. টপ সামারি কার্ডস */}
             <div className={styles.usersStatsGrid}>
                 <StatCard title="Total Users" value={totalUsers} icon={FiUsers} iconColor="#90273c" />
                 <StatCard title="Active" value={activeUsers} icon={FiUserCheck} iconColor="#38a169" />
                 <StatCard title="Suspended" value={suspendedUsers} icon={FiUserX} iconColor="#e53e3e" />
             </div>
 
-            {/* ৩. সার্চ ও ফিল্টার বার */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '16px' }}>
                 <div className="searchBoxWrapper" style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 14px', width: '280px' }}>
                     <FiSearch style={{ color: '#718096', marginRight: '8px' }} />
@@ -107,14 +154,17 @@ export default function UsersPage() {
                 </div>
             </div>
 
-            {/* ৪. ইউজার টেবিল */}
-            <UserTable 
-                users={filteredUsers} 
-                toggleUserStatus={toggleUserStatus} 
-                styles={styles} 
-            />
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#718096' }}>Loading users from database...</div>
+            ) : (
+                <UserTable 
+                    users={filteredUsers} 
+                    toggleUserStatus={toggleUserStatus} 
+                    onDeleteUser={handleDeleteUser} // ডিলিট ফাংশনটি টেবিলে পাঠানো হলো
+                    styles={styles} 
+                />
+            )}
             
-            {/* ৫. Add User Modal */}
             {showAddModal && (
                 <AddUserModal 
                     onClose={() => setShowAddModal(false)} 

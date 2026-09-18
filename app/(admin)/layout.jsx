@@ -10,9 +10,13 @@ import {
     FiBriefcase, FiUserCheck, FiActivity, FiSettings,
     FiHeadphones, FiLogOut,
     FiCalendar, FiSearch, FiBell, FiMenu, FiX,
-    FiSun, FiMoon // ডার্ক ও লাইট মোডের জন্য আইকন ইম্পোর্ট করা হয়েছে
+    FiSun, FiMoon 
 } from 'react-icons/fi';
 import styles from './dashboard.module.css';
+
+// ১. ফায়ারবেস ইম্পোর্ট করা হলো
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 
 const mainMenuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <FiGrid /> },
@@ -47,7 +51,7 @@ export default function AdminLayout({ children }) {
         if (storedName) setUserName(storedName);
         if (storedRole) setUserRole(storedRole);
 
-        // পেজ লোড হওয়ার সময় লোকালস্টোরেজ থেকে থিম চেক করা
+        // পেজ লোড হওয়ার সময় লোকালস্টোরেজ থেকে থিম চেক করা
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             setIsDarkMode(true);
@@ -65,6 +69,25 @@ export default function AdminLayout({ children }) {
             setIsDarkMode(true);
             localStorage.setItem('theme', 'dark');
             document.documentElement.classList.add('dark-mode');
+        }
+    };
+
+    // ২. ফায়ারবেস লগআউট ফাংশন তৈরি করা হলো
+    const handleLogout = async () => {
+        try {
+            await signOut(auth); // ফায়ারবেস থেকে সাইন-আউট
+            
+            // মিডলওয়্যারের কুকি মুছে ফেলা হচ্ছে
+            document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+            
+            // লোকাল স্টোরেজ ক্লিয়ার করা হচ্ছে
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            
+            // লগইন পেজে রিডাইরেক্ট
+            window.location.href = '/login';
+        } catch (error) {
+            console.error("Logout Error:", error);
         }
     };
 
@@ -132,10 +155,9 @@ export default function AdminLayout({ children }) {
                             <p className={styles.helpText}>Contact our support team.</p>
                             <button className={styles.contactBtn}>Contact Support</button>
                         </div>
-                        <button className={styles.logoutBtn} onClick={() => {
-                            localStorage.clear();
-                            window.location.href = '/login';
-                        }}>
+                        
+                        {/* ৩. লগআউট বাটনে ফাংশনটি বসানো হলো */}
+                        <button className={styles.logoutBtn} onClick={handleLogout}>
                             <FiLogOut style={{ fontSize: '18px' }} /> Logout
                         </button>
                     </div>
