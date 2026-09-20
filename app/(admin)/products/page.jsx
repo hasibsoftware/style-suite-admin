@@ -19,7 +19,7 @@ export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
     
-    // সর্টিংয়ের জন্য নতুন স্টেট (newest, low-to-high, high-to-low)
+    // সর্টিংয়ের জন্য নতুন স্টেট (newest, low-to-high, high-to-low)
     const [sortBy, setSortBy] = useState('newest');
     
     // পেজিনেশনের জন্য নতুন স্টেট (প্রতি পেজে ৮টি করে প্রোডাক্ট দেখাবে)
@@ -58,6 +58,13 @@ export default function ProductsPage() {
         try {
             const docRef = await addDoc(collection(db, "products"), productData);
             const newProduct = { firebaseId: docRef.id, ...productData };
+            
+            // 🔴 Dashboard er jonno Live Activity Log
+            await addDoc(collection(db, "activity_logs"), {
+                action: `Added new product: ${productData.name}`,
+                timestamp: new Date().toISOString()
+            });
+
             setProductsList([newProduct, ...productsList]);
             setShowAddModal(false);
             toast.success('Product added successfully!');
@@ -77,6 +84,12 @@ export default function ProductsPage() {
                 stock: updatedProduct.stock,
                 status: updatedProduct.status,
                 images: updatedProduct.images,
+            });
+            
+            // 🔴 Dashboard er jonno Live Activity Log
+            await addDoc(collection(db, "activity_logs"), {
+                action: `Updated product: ${updatedProduct.name}`,
+                timestamp: new Date().toISOString()
             });
             
             setProductsList(productsList.map(p => p.firebaseId === updatedProduct.firebaseId ? updatedProduct : p));
@@ -103,6 +116,13 @@ export default function ProductsPage() {
         try {
             const productRef = doc(db, "products", firebaseId);
             await updateDoc(productRef, { status: newStatus });
+            
+            // 🔴 Dashboard er jonno Live Activity Log
+            await addDoc(collection(db, "activity_logs"), {
+                action: `Product status changed to ${newStatus}`,
+                timestamp: new Date().toISOString()
+            });
+
             setProductsList(productsList.map(p => p.firebaseId === firebaseId ? { ...p, status: newStatus } : p));
             
             if (newStatus === 'Archived') toast.success('Product moved to Archive.');
@@ -118,6 +138,13 @@ export default function ProductsPage() {
         if (!window.confirm("Are you sure you want to delete this product permanently?")) return;
         try {
             await deleteDoc(doc(db, "products", firebaseId));
+            
+            // 🔴 Dashboard er jonno Live Activity Log
+            await addDoc(collection(db, "activity_logs"), {
+                action: `Deleted a product permanently`,
+                timestamp: new Date().toISOString()
+            });
+
             setProductsList(productsList.filter(p => p.firebaseId !== firebaseId));
             toast.success('Product deleted permanently.');
         } catch (error) {
